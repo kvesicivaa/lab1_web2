@@ -25,7 +25,6 @@ async function getAccessToken() {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(express.json()); 
 
@@ -93,6 +92,6 @@ app.post('/generate-qrcode', async (req: Request, res: Response) => {
 });
 
 
-app.listen(PORT, () => {
+app.listen(() => {
   console.log(`Server radi na https://lab1_web2.onrender.com`);
 });
