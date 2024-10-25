@@ -79,7 +79,7 @@ app.post('/generate-qrcode', async (req: Request, res: Response) => {
 
     const ticketId = insertResult.rows[0].id; 
 
-    const ticketUrl = `https://localhost:3000/ticket/${ticketId}`;
+    const ticketUrl = `https://lab1_web2.onrender.com/${ticketId}`;
 
     return res.status(201).json({
       message: 'Ulaznica je uspješno generirana',
@@ -94,5 +94,5 @@ app.post('/generate-qrcode', async (req: Request, res: Response) => {
 
 
 app.listen(PORT, () => {
-  console.log(`Server radi na http://localhost:${PORT}`);
+  console.log(`Server radi na https://lab1_web2.onrender.com`);
 });
