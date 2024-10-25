@@ -76,7 +76,7 @@ app.post('/generate-qrcode', (req, res) => __awaiter(void 0, void 0, void 0, fun
         }
         const insertResult = yield database_1.default.query('INSERT INTO tickets (vatin, first_name, last_name, created_at) VALUES ($1, $2, $3, $4) RETURNING id', [vatin, firstName, lastName, new Date()]);
         const ticketId = insertResult.rows[0].id;
-        const ticketUrl = `https://lab1_web2.onrender.com/${ticketId}`;
+        const ticketUrl = `https://lab1-web2-onrender-com.onrender.com/${ticketId}`;
         return res.status(201).json({
             message: 'Ulaznica je uspješno generirana',
             qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?data=${ticketUrl}`,
@@ -89,5 +89,5 @@ app.post('/generate-qrcode', (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 }));
 app.listen(() => {
-    console.log(`Server radi na https://lab1_web2.onrender.com`);
+    console.log(`Server radi na https://lab1-web2-onrender-com.onrender.com`);
 });
