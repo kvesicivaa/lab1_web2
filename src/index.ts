@@ -3,6 +3,8 @@ import pool from './database';
 import axios from 'axios';
 import jwtCheck from './jwtCheck'; 
 import dotenv from 'dotenv';
+import authConfig from './userAuth';
+
 
 dotenv.config();
 
@@ -49,16 +51,9 @@ app.get('/get-token', async (req, res) => {
   }
 });
 
-
-app.get('/userinfo', jwtCheck, (req, res) => {
-  res.send("User info is valid!");
-});
-
-
 app.post('/generate-qrcode', async (req: Request, res: Response) => {
   const { vatin, firstName, lastName } = req.body;
 
-  // Provjeri ulazne parametre
   if (!vatin || !firstName || !lastName) {
     return res.status(400).send('Nedostaju podaci.');
   }
@@ -78,7 +73,7 @@ app.post('/generate-qrcode', async (req: Request, res: Response) => {
 
     const ticketId = insertResult.rows[0].id; 
 
-    const ticketUrl = `https://lab1-web2-onrender-com.onrender.com/${ticketId}`;
+    const ticketUrl = `http://localhost:3000/${ticketId}`;
 
     return res.status(201).json({
       message: 'Ulaznica je uspješno generirana',
@@ -91,7 +86,35 @@ app.post('/generate-qrcode', async (req: Request, res: Response) => {
   }
 });
 
+app.get('/ticket/:ticketId', async (req: Request, res: Response) => {
+  const { ticketId } = req.params;
 
-app.listen(() => {
-  console.log(`Server radi na https://lab1-web2-onrender-com.onrender.com`);
+  try {
+    const result = await pool.query(
+      'SELECT vatin, first_name, last_name, created_at FROM tickets WHERE id = $1',
+      [ticketId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send('Ulaznica nije pronađena');
+    }
+
+    const ticketData = result.rows[0];
+
+    res.send(`
+      <h1>Informacije o korisniku</h1>
+      <p><strong>OIB:</strong> ${ticketData.vatin}</p>
+      <p><strong>Ime:</strong> ${ticketData.first_name}</p>
+      <p><strong>Prezime:</strong> ${ticketData.last_name}</p>
+      <p><strong>Vrijeme nastanka ulaznice:</strong> ${ticketData.created_at}</p>
+    `);
+  } catch (error) {
+    console.error('Error retrieving ticket data:', error);
+    res.status(500).send('An error occurred while retrieving ticket data');
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server je pokrenut na: http://localhost:${PORT}`);
 });

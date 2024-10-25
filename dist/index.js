@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const database_1 = __importDefault(require("./database"));
 const axios_1 = __importDefault(require("axios"));
-const jwtCheck_1 = __importDefault(require("./jwtCheck"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 function getAccessToken() {
@@ -59,12 +58,8 @@ app.get('/get-token', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(500).send('Error retrieving access token');
     }
 }));
-app.get('/userinfo', jwtCheck_1.default, (req, res) => {
-    res.send("User info is valid!");
-});
 app.post('/generate-qrcode', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { vatin, firstName, lastName } = req.body;
-    // Provjeri ulazne parametre
     if (!vatin || !firstName || !lastName) {
         return res.status(400).send('Nedostaju podaci.');
     }
@@ -76,7 +71,7 @@ app.post('/generate-qrcode', (req, res) => __awaiter(void 0, void 0, void 0, fun
         }
         const insertResult = yield database_1.default.query('INSERT INTO tickets (vatin, first_name, last_name, created_at) VALUES ($1, $2, $3, $4) RETURNING id', [vatin, firstName, lastName, new Date()]);
         const ticketId = insertResult.rows[0].id;
-        const ticketUrl = `https://lab1-web2-onrender-com.onrender.com/${ticketId}`;
+        const ticketUrl = `http://localhost:3000/${ticketId}`;
         return res.status(201).json({
             message: 'Ulaznica je uspješno generirana',
             qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?data=${ticketUrl}`,
@@ -88,6 +83,28 @@ app.post('/generate-qrcode', (req, res) => __awaiter(void 0, void 0, void 0, fun
         return res.status(500).json('Došlo je do greške prilikom generiranja ulaznice.');
     }
 }));
-app.listen(() => {
-    console.log(`Server radi na https://lab1-web2-onrender-com.onrender.com`);
+app.get('/ticket/:ticketId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { ticketId } = req.params;
+    try {
+        const result = yield database_1.default.query('SELECT vatin, first_name, last_name, created_at FROM tickets WHERE id = $1', [ticketId]);
+        if (result.rows.length === 0) {
+            return res.status(404).send('Ulaznica nije pronađena');
+        }
+        const ticketData = result.rows[0];
+        res.send(`
+      <h1>Informacije o korisniku</h1>
+      <p><strong>OIB:</strong> ${ticketData.vatin}</p>
+      <p><strong>Ime:</strong> ${ticketData.first_name}</p>
+      <p><strong>Prezime:</strong> ${ticketData.last_name}</p>
+      <p><strong>Vrijeme nastanka ulaznice:</strong> ${ticketData.created_at}</p>
+    `);
+    }
+    catch (error) {
+        console.error('Error retrieving ticket data:', error);
+        res.status(500).send('An error occurred while retrieving ticket data');
+    }
+}));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server je pokrenut na: http://localhost:${PORT}`);
 });

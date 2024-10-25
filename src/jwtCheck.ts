@@ -6,6 +6,6 @@ const jwtCheck = auth({
   tokenSigningAlg: 'RS256',
 });
 
-console.log(jwtCheck);
+//console.log(jwtCheck);
 
 export default jwtCheck; 
