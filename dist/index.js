@@ -37,7 +37,6 @@ function getAccessToken() {
     });
 }
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 3000;
 app.use(express_1.default.json());
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -77,7 +76,7 @@ app.post('/generate-qrcode', (req, res) => __awaiter(void 0, void 0, void 0, fun
         }
         const insertResult = yield database_1.default.query('INSERT INTO tickets (vatin, first_name, last_name, created_at) VALUES ($1, $2, $3, $4) RETURNING id', [vatin, firstName, lastName, new Date()]);
         const ticketId = insertResult.rows[0].id;
-        const ticketUrl = `https://localhost:3000/ticket/${ticketId}`;
+        const ticketUrl = `https://lab1_web2.onrender.com/${ticketId}`;
         return res.status(201).json({
             message: 'Ulaznica je uspješno generirana',
             qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?data=${ticketUrl}`,
@@ -89,6 +88,6 @@ app.post('/generate-qrcode', (req, res) => __awaiter(void 0, void 0, void 0, fun
         return res.status(500).json('Došlo je do greške prilikom generiranja ulaznice.');
     }
 }));
-app.listen(PORT, () => {
-    console.log(`Server radi na http://localhost:${PORT}`);
+app.listen(() => {
+    console.log(`Server radi na https://lab1_web2.onrender.com`);
 });
