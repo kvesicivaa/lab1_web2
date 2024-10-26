@@ -1,11 +1,9 @@
 import express, { Request, Response } from 'express';
 import pool from './database';
 import jwtCheck from './jwtCheck'; 
-//import userAuth from './userAuth'; 
 import dotenv from 'dotenv';
 import { ConfigParams, requiresAuth } from 'express-openid-connect';
 import { auth } from 'express-openid-connect';
-
 
 dotenv.config();
 
@@ -29,7 +27,8 @@ app.get('/', async (req: Request, res: Response) => {
     const result = await pool.query('SELECT COUNT(*) FROM tickets');
     const ticketCount = result.rows[0].count;
     res.send(`<h1>Ukupan broj generiranih ulaznica: ${ticketCount}</h1>`);
-  } catch (err) {
+  } 
+  catch (err) {
     console.error(err);
     res.status(500).send('Greška pri dohvaćanju podataka.');
   }
@@ -40,7 +39,7 @@ app.post('/generate-qrcode', jwtCheck, async (req: Request, res: Response) => {
   const { vatin, firstName, lastName } = req.body;
 
   if (!vatin || !firstName || !lastName) {
-    return res.status(400).send('Nedostaju potrebni podaci.');
+    return res.status(400).send('Nedostaju potrebni podaci (OIB, ime i prezime).');
   }
 
   try {
@@ -48,7 +47,7 @@ app.post('/generate-qrcode', jwtCheck, async (req: Request, res: Response) => {
     const ticketCount = parseInt(result.rows[0].count);
 
     if (ticketCount >= 3) {
-      return res.status(400).send('Osoba s ovim OIB-om već ima maksimalno 3 ulaznice.');
+      return res.status(400).send('Osoba/tvrtka s ovim OIB-om već ima maksimalno 3 ulaznice.');
     }
 
     const insertResult = await pool.query(
@@ -74,7 +73,7 @@ app.post('/generate-qrcode', jwtCheck, async (req: Request, res: Response) => {
 
 app.get('/:ticketId', requiresAuth(), async (req: Request, res: Response) => {
   
-  console.log(req.oidc.isAuthenticated());
+  //console.log(req.oidc.isAuthenticated());
   const { ticketId } = req.params;
 
   try {
@@ -84,14 +83,14 @@ app.get('/:ticketId', requiresAuth(), async (req: Request, res: Response) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).send('Ulaznica nije pronađena');
+      return res.status(404).send('Ulaznica nije pronađena.');
     }
 
     const ticketData = result.rows[0];
     const userName = req.oidc.user?.name;
     
     res.send(`
-      <h1>Informacije o korisniku</h1>
+      <h1>Informacije o ulaznici i korisniku</h1>
       <p><strong>OIB:</strong> ${ticketData.vatin}</p>
       <p><strong>Ime:</strong> ${ticketData.first_name}</p>
       <p><strong>Prezime:</strong> ${ticketData.last_name}</p>
