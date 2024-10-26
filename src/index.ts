@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import pool from './database';
 import jwtCheck from './jwtCheck'; 
+import userAuth from './userAuth'; 
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -59,7 +60,7 @@ app.post('/generate-qrcode', jwtCheck, async (req: Request, res: Response) => {
 });
 
 
-app.get('/ticket/:ticketId', async (req: Request, res: Response) => {
+app.get('/:ticketId', userAuth, async (req: Request, res: Response) => {
   
   //console.log(req.oidc.isAuthenticated());
   const { ticketId } = req.params;

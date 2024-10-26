@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const database_1 = __importDefault(require("./database"));
 const jwtCheck_1 = __importDefault(require("./jwtCheck"));
+const userAuth_1 = __importDefault(require("./userAuth"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -56,7 +57,7 @@ app.post('/generate-qrcode', jwtCheck_1.default, (req, res) => __awaiter(void 0,
         return res.status(500).json('Došlo je do pogreške prilikom generiranja ulaznice.');
     }
 }));
-app.get('/ticket/:ticketId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/:ticketId', userAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //console.log(req.oidc.isAuthenticated());
     const { ticketId } = req.params;
     try {
