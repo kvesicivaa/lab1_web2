@@ -1,8 +1,11 @@
 import express, { Request, Response } from 'express';
 import pool from './database';
 import jwtCheck from './jwtCheck'; 
-import userAuth from './userAuth'; 
+//import userAuth from './userAuth'; 
 import dotenv from 'dotenv';
+import { ConfigParams, requiresAuth } from 'express-openid-connect';
+import { auth } from 'express-openid-connect';
+
 
 dotenv.config();
 
@@ -10,7 +13,16 @@ const app = express();
 
 app.use(express.json()); 
 
-//app.use(auth(config)); 
+const userAuth: ConfigParams = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: process.env.AUTH0_CLIENT_SECRET_USER_AUTH,
+  baseURL: 'https://lab1-web2-onrender-com.onrender.com/',
+  clientID: process.env.AUTH0_CLIENT_ID_USER_AUTH,
+  issuerBaseURL: 'https://dev-oimj0pttu1x4b3hd.us.auth0.com/',
+};
+
+app.use(auth(userAuth)); 
 
 app.get('/', async (req: Request, res: Response) => {
   try {
@@ -60,7 +72,7 @@ app.post('/generate-qrcode', jwtCheck, async (req: Request, res: Response) => {
 });
 
 
-app.get('/:ticketId', userAuth, async (req: Request, res: Response) => {
+app.get('/:ticketId', requiresAuth(), async (req: Request, res: Response) => {
   
   console.log(req.oidc.isAuthenticated());
   const { ticketId } = req.params;

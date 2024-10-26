@@ -15,12 +15,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const database_1 = __importDefault(require("./database"));
 const jwtCheck_1 = __importDefault(require("./jwtCheck"));
-const userAuth_1 = __importDefault(require("./userAuth"));
+//import userAuth from './userAuth'; 
 const dotenv_1 = __importDefault(require("dotenv"));
+const express_openid_connect_1 = require("express-openid-connect");
+const express_openid_connect_2 = require("express-openid-connect");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-//app.use(auth(config)); 
+const userAuth = {
+    authRequired: false,
+    auth0Logout: true,
+    secret: process.env.AUTH0_CLIENT_SECRET_USER_AUTH,
+    baseURL: 'https://lab1-web2-onrender-com.onrender.com/',
+    clientID: process.env.AUTH0_CLIENT_ID_USER_AUTH,
+    issuerBaseURL: 'https://dev-oimj0pttu1x4b3hd.us.auth0.com/',
+};
+app.use((0, express_openid_connect_2.auth)(userAuth));
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield database_1.default.query('SELECT COUNT(*) FROM tickets');
@@ -57,7 +67,7 @@ app.post('/generate-qrcode', jwtCheck_1.default, (req, res) => __awaiter(void 0,
         return res.status(500).json('Došlo je do pogreške prilikom generiranja ulaznice.');
     }
 }));
-app.get('/:ticketId', userAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/:ticketId', (0, express_openid_connect_1.requiresAuth)(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     console.log(req.oidc.isAuthenticated());
     const { ticketId } = req.params;
