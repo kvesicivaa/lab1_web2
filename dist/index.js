@@ -58,7 +58,8 @@ app.post('/generate-qrcode', jwtCheck_1.default, (req, res) => __awaiter(void 0,
     }
 }));
 app.get('/:ticketId', userAuth_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //console.log(req.oidc.isAuthenticated());
+    var _a;
+    console.log(req.oidc.isAuthenticated());
     const { ticketId } = req.params;
     try {
         const result = yield database_1.default.query('SELECT vatin, first_name, last_name, created_at FROM tickets WHERE id = $1', [ticketId]);
@@ -66,13 +67,14 @@ app.get('/:ticketId', userAuth_1.default, (req, res) => __awaiter(void 0, void 0
             return res.status(404).send('Ulaznica nije pronađena');
         }
         const ticketData = result.rows[0];
-        //const userName = req.oidc.user?.name;
+        const userName = (_a = req.oidc.user) === null || _a === void 0 ? void 0 : _a.name;
         res.send(`
       <h1>Informacije o korisniku</h1>
       <p><strong>OIB:</strong> ${ticketData.vatin}</p>
       <p><strong>Ime:</strong> ${ticketData.first_name}</p>
       <p><strong>Prezime:</strong> ${ticketData.last_name}</p>
       <p><strong>Vrijeme nastanka ulaznice:</strong> ${ticketData.created_at}</p>
+      <p><strong>Korisnik koji je logiran: ${userName}</p>
     `);
     }
     catch (error) {

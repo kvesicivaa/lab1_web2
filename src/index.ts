@@ -62,7 +62,7 @@ app.post('/generate-qrcode', jwtCheck, async (req: Request, res: Response) => {
 
 app.get('/:ticketId', userAuth, async (req: Request, res: Response) => {
   
-  //console.log(req.oidc.isAuthenticated());
+  console.log(req.oidc.isAuthenticated());
   const { ticketId } = req.params;
 
   try {
@@ -76,7 +76,7 @@ app.get('/:ticketId', userAuth, async (req: Request, res: Response) => {
     }
 
     const ticketData = result.rows[0];
-    //const userName = req.oidc.user?.name;
+    const userName = req.oidc.user?.name;
     
     res.send(`
       <h1>Informacije o korisniku</h1>
@@ -84,6 +84,7 @@ app.get('/:ticketId', userAuth, async (req: Request, res: Response) => {
       <p><strong>Ime:</strong> ${ticketData.first_name}</p>
       <p><strong>Prezime:</strong> ${ticketData.last_name}</p>
       <p><strong>Vrijeme nastanka ulaznice:</strong> ${ticketData.created_at}</p>
+      <p><strong>Korisnik koji je logiran: ${userName}</p>
     `);
   } catch (error) {
     console.error('Error retrieving ticket data:', error);
