@@ -4,7 +4,6 @@ const express_oauth2_jwt_bearer_1 = require("express-oauth2-jwt-bearer");
 const jwtCheck = (0, express_oauth2_jwt_bearer_1.auth)({
     audience: 'https://ticketqr.api',
     issuerBaseURL: 'https://dev-oimj0pttu1x4b3hd.us.auth0.com/',
-    tokenSigningAlg: 'RS256',
+    tokenSigningAlg: 'RS256'
 });
-//console.log(jwtCheck);
 exports.default = jwtCheck;
